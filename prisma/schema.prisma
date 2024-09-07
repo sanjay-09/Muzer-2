@@ -33,6 +33,14 @@ model Stream{
   largeImg String
   user User @relation(fields: [userId],references: [id])
   upvotes Upvote[]
+  currentStream CurrentStream?
+  played Boolean? @default(false)
+}
+model CurrentStream{
+  userId String @id
+  streamId String @unique
+  stream Stream @relation(fields: [streamId],references: [id])
+
 }
 model Upvote{
   id String @id @default(uuid())
@@ -42,6 +50,7 @@ model Upvote{
   stream Stream @relation(fields: [streamId],references: [id])
   @@unique([userId,streamId])
 }
+
 enum AuthType{
   google
 }

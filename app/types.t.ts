@@ -6,4 +6,5 @@ export type SongType={
     smallImg:string
     largeImg:string
     upvotes:number
+    isVoted:boolean
 }

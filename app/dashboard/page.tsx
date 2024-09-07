@@ -7,12 +7,13 @@ import { useRouter } from "next/navigation";
 export default function Component() {
     const session=useSession();
     const router=useRouter();
+    const storedCreatorId = sessionStorage.getItem('creatorId');
     if(!session.data?.user.id){
         return router.push('/');
     }
 
     
 
-    return <StreamView/>
+    return <StreamView creatorId={storedCreatorId?storedCreatorId:session.data.user.id}/>
 }
 
