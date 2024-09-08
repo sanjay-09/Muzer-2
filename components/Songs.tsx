@@ -8,18 +8,18 @@ const Songs: React.FC<{
   vote: (id: string, type: string) => void;
 }> =  ({ song, vote }) => {
   return (
-    <div className="flex justify-between">
-      <div className="flex gap-3">
+    <div className="flex">
+      <div className="flex gap-3 pl-0">
         <img
-          src={song.largeImg}
+          src={song.smallImg}
           alt="Song thumbnail"
           width={200}
           height={200}
-          className="rounded-md object-cover"
+          className="rounded-md max-w-[200px]"
           style={{ aspectRatio: "200/200", objectFit: "cover" }}
         />
         <div className="flex-1 grid gap-1">
-          <div className="font-medium text-black">{song.title}</div>
+          <div className="font-medium text-black ">{song.title}</div>
         </div>
       </div>
       <div className="flex items-center gap-2">

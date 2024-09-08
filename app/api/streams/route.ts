@@ -25,20 +25,18 @@ export const POST=async(req:NextRequest)=>{
         })
     }
     const extractedId=result.url.split("?v=")[1];
-    const data=await youtubesearchapi.GetVideoDetails(extractedId);
-    let thumbnails=data.thumbnail.thumbnails;
-    thumbnails=thumbnails.sort((a:{width:number},b:{width:number})=>{
-        return a.width-b.width
-
-    });
+    const data=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${extractedId}&key=${process.env.NEXT_API_KEY}`);
+    const dataResponse=await data.json();
+    let thumbnails=dataResponse.items[0].snippet.thumbnails;
+   
 
 
     await prismaClient.stream.create({
         data:{
             userId:result.creatorId,
-            title:data.title,
-            smallImg:thumbnails.length>1?thumbnails[thumbnails.length-2].url:thumbnails[thumbnails.length-1].url,
-            largeImg:thumbnails[thumbnails.length-1].url,
+            title:dataResponse.items[0].snippet.title,
+            smallImg:thumbnails.high.url,
+            largeImg:thumbnails.standard.url,
             extractedId:extractedId,
             url:result.url
         }
