@@ -3,9 +3,11 @@ import { ArrowBigUp,ArrowBigDown } from 'lucide-react';
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import AppBar from '@/components/AppBar';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SongType } from '@/app/types.t';
 import Songs from './Songs';
+//@ts-ignore
+import YouTubePlayer  from "youtube-player"
 
 const refreshTimer=10*1000;
 
@@ -14,7 +16,9 @@ export default function StreamView({creatorId}:{creatorId:string}) {
     const [youtubeUrl,setYoutubeUrl]=useState("");
     const [loading,setLoading]=useState(false);
     const [activeStream,setActiveStream]=useState<SongType>();
+    console.log(activeStream);
     console.log("creatorId",creatorId)
+    const video=useRef<HTMLDivElement>();
     const refereshFeeds=async()=>{
        
         const data=await fetch(`/api/streams?creatorId=${creatorId}`);
@@ -27,16 +31,24 @@ export default function StreamView({creatorId}:{creatorId:string}) {
             return b.upvotes-a.upvotes
         })
         setSongs(songsData);
-        setActiveStream(response.active);
+       if(response.active){
+        setActiveStream(video=>{
+          if(video?.id===response.active.id){
+            return video;
+          }
+          return response.active;
+        });
+       }
 
     }
     useEffect(()=>{
-        setInterval(()=>{
+       const interval= setInterval(()=>{
            
             refereshFeeds();
             
         },refreshTimer);
-    },[]);
+        return () => clearInterval(interval)
+    },[creatorId]);
 
     const addToTheQueue=async()=>{
         setLoading(true);
@@ -89,14 +101,54 @@ export default function StreamView({creatorId}:{creatorId:string}) {
 
     }
     const playNext=async()=>{
+      console.log('play');
       const data=await fetch('/api/streams/next');
       if(!data.ok){
         return;
       }
       const responsedata=await data.json();
       setActiveStream(responsedata.stream);
+     const updated=songs.filter((song)=>{
+      return song.id!=responsedata.stream.id
+
+      })
+      setSongs(updated);
 
     }
+    useEffect(()=>{
+      if(!video.current || !activeStream){
+        return;
+      }
+     
+
+const player = YouTubePlayer(video.current);
+console.log('in',video.current,activeStream.title,activeStream?.extractedId);
+
+// 'loadVideoById' is queued until the player is ready to receive API calls.
+player.loadVideoById(''+activeStream?.extractedId);
+
+
+// 'playVideo' is queue until the player is ready to received API calls and after 'loadVideoById' has been called.
+player.playVideo();
+const eventHandler = (event: { data: number }) => {
+  if (event.data === 0) {
+      playNext()
+  }
+}
+player.on('stateChange', eventHandler)
+return () => {
+  player.destroy()
+}
+
+
+  
+ 
+ 
+
+
+
+      
+    },[activeStream,video])
   return (
     <div className="flex flex-col gap-8 max-w-3xl mx-auto px-4 py-8">
         <AppBar/>
@@ -133,17 +185,14 @@ export default function StreamView({creatorId}:{creatorId:string}) {
         }}>
           Share
         </Button>
-     {
-      activeStream &&  <div className="bg-[#f0f8ff] rounded-lg shadow-sm p-4 flex items-center gap-4">
-      <iframe width="420" height="315"
-src={`https://www.youtube.com/embed/${activeStream?.extractedId}?autoplay=1&mute=0`}>
-</iframe>
-        <div className="flex-1 grid gap-1">
-          <div className="font-medium text-black">{activeStream?.title}</div>
-          
+     { 
+     //@ts-ignore
+      
+      activeStream &&  <div ref={video} className='w-full'>
+        
         </div>
        
-      </div>
+      
      }
       <Button size="sm" className="bg-[#4CAF50] text-white hover:bg-[#45a049]" onClick={()=>{
         playNext();

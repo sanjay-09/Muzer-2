@@ -112,6 +112,7 @@ export const GET=async(req:NextRequest)=>{
         include:{
             stream:{
                 select:{
+                    id:true,
                     title:true,
                     largeImg:true,
                     extractedId:true
