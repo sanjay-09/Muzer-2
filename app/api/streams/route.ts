@@ -55,7 +55,7 @@ export const POST=async(req:NextRequest)=>{
     console.log(err);
     
     return NextResponse.json({
-        data:"error"
+        data:err
     },{
         status:500
     })
