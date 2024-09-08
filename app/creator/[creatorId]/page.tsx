@@ -13,7 +13,7 @@ const page=({params}:{
     const session=useSession();
     const router=useRouter();
     if(!session.data?.user.id){
-        sessionStorage.setItem('creatorId', params.creatorId);
+        typeof window !== "undefined" && window.localStorage.setItem('creatorId', params.creatorId);
         return router.push("/")
 
         

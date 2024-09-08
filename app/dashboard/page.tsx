@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 export default function Component() {
     const session=useSession();
     const router=useRouter();
-    const storedCreatorId = sessionStorage.getItem('creatorId');
+    const storedCreatorId = typeof window !== "undefined"?window.localStorage.getItem('creatorId'):null;
     if(!session.data?.user.id){
         return router.push('/');
     }
